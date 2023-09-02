@@ -1,0 +1,37 @@
+.Login{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .login-box {
+        padding: 40px;
+        border: 1px solid black;
+        min-width: 400px;
+        border-radius: 5px;
+    }
+    h2 {
+        text-align: center;
+    }
+    label, input {
+        display: block;
+        width: 100%;
+        margin: 5px;
+        border-radius: 3px;
+    }
+    .submit {
+        margin-top: 25px;
+        font-weight: bold;
+        background-color: rgb(18, 135, 178);
+    }
+    input {
+        padding: 8px 16px;
+    }
+    .submit:hover {
+        background-color: rgb(9, 226, 183);
+    }
+    .subHeading{
+        margin-top: 8px;
+        margin-left: 6px;
+    }
+}
