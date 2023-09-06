@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
     owner : {
-        type : mongoose.Schema.types.ObjectId,
+        type : mongoose.Schema.Types.ObjectId,
         ref : 'user',
         required : true
     },

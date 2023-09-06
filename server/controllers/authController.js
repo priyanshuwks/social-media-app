@@ -8,11 +8,12 @@ const signupController = async (req, res) => {
     //const {email, password} = req.body;
     const email = req.body.email;
     const password = req.body.password;
+    const name = req.body.name;
 
     //if email & password both are not prsent
-    if (!email || !password) {
+    if (!email || !password || !name) {
       // return res.status(403).send("All fields are required");
-      return res.send(error(403, "All fields are required"));
+      return res.send(error(400, "All fields are required"));
     }
 
     //if user already exists:
@@ -26,6 +27,7 @@ const signupController = async (req, res) => {
     const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
+      name,
       email,
       password: hashPassword,
     });
@@ -33,13 +35,14 @@ const signupController = async (req, res) => {
     //   message: "signup successful",
     //   data: user,
     // });
-    return res.send(
+    const newUser = await User.findById(user._id); //find the user so that so that we don't send
+    return res.send(                               //the password after the signup.
       success(201, {
-        data: user,
+        data: newUser,
       })
     );
-  } catch (error) {
-    console.log(`error occured : ${error}`);
+  } catch (err) {
+    res.send(error(500, err.message))
   }
 };
 
@@ -48,7 +51,7 @@ const loginController = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       // return res.status(404).json({
       //   message: "user not found",
@@ -75,8 +78,8 @@ const loginController = async (req, res) => {
     //   accessToken: accessToken,
     // });
     return res.send(success(200, { accessToken }));
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    res.send(error(500, err.message));
   }
 };
 //this api will check the refreshToken validity & generate a new access token
