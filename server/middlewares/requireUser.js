@@ -6,15 +6,18 @@ module.exports = async (req, res, next) => {
         // return res.status(401).json({
         //     status : 'failed, authorization header is required'
         // })
-        return res.send(error(401, 'faile, authorization header is required'));
+        return res.send(error(401, 'failed, authorization header is required'));
     }
     const accessToken = req.headers.authorization.split(" ")[1];
+    console.log('access token below');
     console.log(accessToken);
     try{
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_PRIVATE_KEY);
+        req._id = decoded._id;
+        next();
 
-    }catch(error){
-        console.log(error);
+    }catch(err){
+        console.log('error occured in the catch' , err);
         // return res.status(401).json({
         //     message : 'invalid access key'
         // })

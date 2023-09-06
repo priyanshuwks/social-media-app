@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const {error, success} = require('../utils/responseWrapper')
+const { error, success } = require("../utils/responseWrapper");
 
 const signupController = async (req, res) => {
   try {
@@ -12,14 +12,14 @@ const signupController = async (req, res) => {
     //if email & password both are not prsent
     if (!email || !password) {
       // return res.status(403).send("All fields are required");
-      return res.send(error(403, 'All fields are required'));
+      return res.send(error(403, "All fields are required"));
     }
 
     //if user already exists:
     const oldUser = await User.findOne({ email });
     if (oldUser) {
       // res.status(409).send("user is already resgistered");
-      res.send(error(409, 'user already registered'))
+      res.send(error(409, "user already registered"));
       return;
     }
     //handle password:
@@ -33,10 +33,11 @@ const signupController = async (req, res) => {
     //   message: "signup successful",
     //   data: user,
     // });
-    return res.send(success(201,{
-      data : user
-    }))
-
+    return res.send(
+      success(201, {
+        data: user,
+      })
+    );
   } catch (error) {
     console.log(`error occured : ${error}`);
   }
@@ -52,14 +53,14 @@ const loginController = async (req, res) => {
       // return res.status(404).json({
       //   message: "user not found",
       // });
-      return res.send(error(404, 'user not found'));
+      return res.send(error(404, "user not found"));
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
       // return res.status(403).json({
       //   message: "Incorrect password",
       // });
-      return res.send(403, 'Incorrect password');
+      return res.send(403, "Incorrect password");
     }
     const accessToken = generateAccessToken({ id: user.id });
     const refreshToken = generateRefreshToken({ id: user.id });
@@ -73,7 +74,7 @@ const loginController = async (req, res) => {
     //   message: "login successful",
     //   accessToken: accessToken,
     // });
-    return res.send(success(200, {accessToken}))
+    return res.send(success(200, { accessToken }));
   } catch (error) {
     console.log(error);
   }
@@ -81,8 +82,11 @@ const loginController = async (req, res) => {
 //this api will check the refreshToken validity & generate a new access token
 const refreshAccessTokenController = async (req, res) => {
   const cookies = req.cookies; //extracting cookies array from req.cookies
-  if(!cookies.jwt){     //if jwt cookie is not present then do below
-    return res.status(401).json({"message" : "Refresh Token in cookies is required"});
+  if (!cookies.jwt) {
+    //if jwt cookie is not present then do below
+    return res
+      .status(401)
+      .json({ message: "Refresh Token in cookies is required" });
   }
   const refreshToken = cookies.jwt;
   try {
@@ -93,18 +97,18 @@ const refreshAccessTokenController = async (req, res) => {
     const id = decoded.id;
     const accessToken = generateAccessToken({ id });
     // return res.status(201).json({ accessToken });
-    return res.send(success(201, {accessToken}))
+    return res.send(success(201, { accessToken }));
   } catch (error) {
     console.log(error);
     // return res.status(401).send("Invalid refresh token");
-    return res.send(error(401, 'Invalid refresh token'));
+    return res.send(error(401, "Invalid refresh token"));
   }
 };
 //internal functions
 const generateAccessToken = (data) => {
   try {
     const token = jwt.sign(data, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
-      expiresIn: "10m",
+      expiresIn: "20s",
     });
     console.log(token);
     return token;
