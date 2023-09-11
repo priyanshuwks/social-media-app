@@ -5,6 +5,7 @@ const dbConnect = require('./dbConnect');
 const authRouter = require('./routers/authRouter');
 const morgan = require('morgan');
 const postRouter = require('./routers/postRouter');
+const userRouter = require('./routers/userRouter');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
@@ -21,6 +22,7 @@ app.use(cors({
 
 app.use('/auth', authRouter);
 app.use('/post', postRouter);
+app.use('/user', userRouter);
 
 // app.get('/', (req, res) => {
 //     res.json({
@@ -33,5 +35,5 @@ const PORT = process.env.PORT || 4000;
 dbConnect();
 
 app.listen(PORT, () => {
-    console.log('listening to prot: ', PORT);
+    console.log('listening to port: ', PORT);
 })

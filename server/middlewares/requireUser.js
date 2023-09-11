@@ -13,15 +13,13 @@ module.exports = async (req, res, next) => {
     console.log(accessToken);
     try{
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_PRIVATE_KEY);
-        req._id = decoded._id;
+        req._id = decoded.id;
         next();
-
     }catch(err){
         console.log('error occured in the catch' , err);
         // return res.status(401).json({
         //     message : 'invalid access key'
         // })
-        return res.send(error(401, 'Invalid access key'))
+        return res.send(error(401, 'Invalid access key'));
     }
-    next();
 }

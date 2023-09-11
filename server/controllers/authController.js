@@ -111,7 +111,7 @@ const refreshAccessTokenController = async (req, res) => {
 const generateAccessToken = (data) => {
   try {
     const token = jwt.sign(data, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
-      expiresIn: "20s",
+      expiresIn: "15m",
     });
     console.log(token);
     return token;
@@ -131,8 +131,21 @@ const generateRefreshToken = (data) => {
     console.log(error);
   }
 };
+
+const logoutController = async (req, res) => {
+  try{
+    res.clearCookie('jwt', {
+      httpOnly : true,
+      secure : true
+    })
+    return res.send(success(200, 'user logged out'))
+  }catch(err){
+    return res.send(error(500, err.message));
+  }
+}
 module.exports = {
   signupController,
   loginController,
   refreshAccessTokenController,
+  logoutController
 };
