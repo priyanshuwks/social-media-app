@@ -67,6 +67,10 @@ const getMyPostsController = async (req, res) => {
   try {
     const currUserId = req._id;
 
+    // const getAllPosts = await Post.find({
+    //     owner : currUserId
+    // }).populate('likes');
+
     const currUser = await User.findById(currUserId);
     if (!currUser) {
       return res.send(error(404, "The user does not exists"));
@@ -86,7 +90,7 @@ const getMyPostsController = async (req, res) => {
 const getUserPostsController = async (req, res) => {
   try {
     //const currUserId = req._id;
-    const {idOfOtherUser} = req.body;
+    const { idOfOtherUser } = req.body;
 
     const otherUser = await User.findById(idOfOtherUser);
     if (!otherUser) {
@@ -110,22 +114,67 @@ const getUserPostsController = async (req, res) => {
 };
 
 const deleteMyProfileController = async (req, res) => {
+  try {
     const currUserId = req._id;
 
-    //updating the likes in the posts liked by the currUser.
-    const postsLikedByThisUser = await Post.find({
-        likes : {
-            '$in' : currUserId
-        }
-    })
-    console.log('posts like byt eh user')
-    console.log(postsLikedByThisUser);
-}
+    //Things we need to take care
+    // 1. update the followings of followers of this user.
+    // 2. update the followers of followings of this user.
+    // 3. delete all the posts of this user.
+    // 4. update the likes in the posts, done by this user.
+    // 5. then delete this user from the user collection.
+    // 6. clear the cookie
+
+    const currUser = await User.findById(currUserId);
+
+    // 1.
+    currUser.followers.forEach(async (followersId) => {
+      const follower = await User.findById(followersId);
+      const index = follower.followings.indexOf(currUserId);
+      follower.followings.splice(index, 1);
+      await follower.save();
+    });
+
+    // 2. deal with followings
+    currUser.followings.forEach(async (followingId) => {
+      const following = await User.findById(followingId);
+      const index = following.followers.indexOf(currUserId);
+      following.followers.splice(index, 1);
+      await following.save();
+    });
+
+    // 3. delete all the posts of this user
+    await Post.deleteMany({
+      owner: currUserId,
+    });
+
+    // 4. deal with likes
+    const allPosts = await Post.find();
+    allPosts.forEach(async (post) => {
+      const index = post.likes.indexOf(currUserId);
+      post.likes.splice(index, 1);
+      await post.save();
+    });
+
+    // 5. delete the user
+    await currUser.deleteOne();
+
+    // 6. clear the cookie
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: true,
+    });
+
+    return res.send(success(200, 'User has been deleted successfully'));
+  } catch (err) {
+    res.send(error(500, err.message));
+  }
+};
 
 module.exports = {
   followOrUnfollowUser,
   getPostsOfFollowing,
   getMyPostsController,
   getUserPostsController,
-  deleteMyProfileController
+  deleteMyProfileController,
 };

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const {error, success} = require('../utils/responseWrapper')
+const User = require('../models/User')
 module.exports = async (req, res, next) => {
     console.log('I am a middleware');
     if(!req.headers || !req.headers.authorization || !req.headers.authorization.startsWith("Bearer")){
@@ -14,6 +15,11 @@ module.exports = async (req, res, next) => {
     try{
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_PRIVATE_KEY);
         req._id = decoded.id;
+
+        const currUser = await User.findById(req._id);
+        if(!currUser){
+            return res.send(error(404, 'User not found in the middleware'));
+        }
         next();
     }catch(err){
         console.log('error occured in the catch' , err);
